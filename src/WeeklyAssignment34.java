@@ -2,57 +2,53 @@ import java.util.Arrays;
 
 public class WeeklyAssignment34 {
 
-    // 🔵 LINEAR SEARCH (First & Last Occurrence)
-    public static void linearSearch(String[] arr, String target) {
-        int first = -1, last = -1;
+    // 🔵 LINEAR SEARCH (unsorted)
+    public static void linearSearch(int[] arr, int target) {
         int comparisons = 0;
+        boolean found = false;
 
         for (int i = 0; i < arr.length; i++) {
             comparisons++;
-            if (arr[i].equals(target)) {
-                if (first == -1) first = i;
-                last = i;
+            if (arr[i] == target) {
+                found = true;
+                break;
             }
         }
 
         System.out.println("Linear Search:");
-        System.out.println("First Index: " + first);
-        System.out.println("Last Index: " + last);
+        System.out.println("Found: " + found);
         System.out.println("Comparisons: " + comparisons);
         System.out.println("Time Complexity: O(n)\n");
     }
 
-    // 🟢 BINARY SEARCH (Find one occurrence)
-    public static int binarySearch(String[] arr, String target, Counter counter) {
+    // 🟢 BINARY SEARCH INSERTION POINT (lower_bound)
+    public static int lowerBound(int[] arr, int target, Counter c) {
+        int low = 0, high = arr.length;
+
+        while (low < high) {
+            c.count++;
+            int mid = (low + high) / 2;
+
+            if (arr[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+
+    // 🔴 FLOOR (largest ≤ target)
+    public static int floor(int[] arr, int target, Counter c) {
         int low = 0, high = arr.length - 1;
+        int result = -1;
 
         while (low <= high) {
-            counter.count++;
+            c.count++;
             int mid = (low + high) / 2;
 
-            if (arr[mid].equals(target)) {
-                return mid;
-            } else if (arr[mid].compareTo(target) < 0) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return -1;
-    }
-
-    // 🔸 Find First Occurrence (Binary)
-    public static int firstOccurrence(String[] arr, String target, Counter counter) {
-        int low = 0, high = arr.length - 1, result = -1;
-
-        while (low <= high) {
-            counter.count++;
-            int mid = (low + high) / 2;
-
-            if (arr[mid].equals(target)) {
-                result = mid;
-                high = mid - 1;
-            } else if (arr[mid].compareTo(target) < 0) {
+            if (arr[mid] <= target) {
+                result = arr[mid];
                 low = mid + 1;
             } else {
                 high = mid - 1;
@@ -61,62 +57,55 @@ public class WeeklyAssignment34 {
         return result;
     }
 
-    // 🔸 Find Last Occurrence (Binary)
-    public static int lastOccurrence(String[] arr, String target, Counter counter) {
-        int low = 0, high = arr.length - 1, result = -1;
+    // 🔴 CEILING (smallest ≥ target)
+    public static int ceiling(int[] arr, int target, Counter c) {
+        int low = 0, high = arr.length - 1;
+        int result = -1;
 
         while (low <= high) {
-            counter.count++;
+            c.count++;
             int mid = (low + high) / 2;
 
-            if (arr[mid].equals(target)) {
-                result = mid;
-                low = mid + 1;
-            } else if (arr[mid].compareTo(target) < 0) {
-                low = mid + 1;
-            } else {
+            if (arr[mid] >= target) {
+                result = arr[mid];
                 high = mid - 1;
+            } else {
+                low = mid + 1;
             }
         }
         return result;
     }
 
-    // 🔴 Count Occurrences
-    public static void binarySearchWithCount(String[] arr, String target) {
-        Counter counter = new Counter();
-
-        int first = firstOccurrence(arr, target, counter);
-        int last = lastOccurrence(arr, target, counter);
-
-        int count = (first == -1) ? 0 : (last - first + 1);
-
-        System.out.println("Binary Search:");
-        System.out.println("First Index: " + first);
-        System.out.println("Last Index: " + last);
-        System.out.println("Count: " + count);
-        System.out.println("Comparisons: " + counter.count);
-        System.out.println("Time Complexity: O(log n)");
-    }
-
-    // Helper class to track comparisons
     static class Counter {
         int count = 0;
     }
 
     public static void main(String[] args) {
 
-        // INPUT (unsorted)
-        String[] logs = {"accB", "accA", "accB", "accC"};
+        int[] unsorted = {50, 10, 100, 25};
+        int target = 30;
 
-        // 🔵 Linear Search (unsorted allowed)
-        linearSearch(logs, "accB");
+        // 🔵 Linear Search (unsorted)
+        linearSearch(unsorted, target);
 
         // 🟢 Sort for Binary Search
-        Arrays.sort(logs);
+        Arrays.sort(unsorted);
+        System.out.println("Sorted Bands: " + Arrays.toString(unsorted));
 
-        System.out.println("Sorted Logs: " + Arrays.toString(logs));
+        Counter c1 = new Counter();
+        int insertPos = lowerBound(unsorted, target, c1);
 
-        // 🔴 Binary Search with count
-        binarySearchWithCount(logs, "accB");
+        Counter c2 = new Counter();
+        int floor = floor(unsorted, target, c2);
+
+        Counter c3 = new Counter();
+        int ceil = ceiling(unsorted, target, c3);
+
+        System.out.println("\nBinary Search:");
+        System.out.println("Insertion Index: " + insertPos);
+        System.out.println("Floor (<= target): " + floor);
+        System.out.println("Ceiling (>= target): " + ceil);
+        System.out.println("Comparisons: " + (c1.count + c2.count + c3.count));
+        System.out.println("Time Complexity: O(log n)");
     }
 }
